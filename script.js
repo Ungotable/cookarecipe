@@ -68,7 +68,6 @@ function renderPantry() {
 function updateDisplay() {
     const searchTerm = searchInput.value.toLowerCase();
     const selectedArray = Array.from(selectedPantryItems);
-    
     const mode = document.querySelector('input[name="pantryMode"]:checked').value;
 
     const filtered = recipes.filter(recipe => {
@@ -78,15 +77,15 @@ function updateDisplay() {
 
         let pantryPass = true;
 
-        if (mode === 'any') {
-            if (selectedArray.length > 0) {
-                pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
-            }
-        } else {
+        if (mode === 'full') {
             if (selectedArray.length === 0) {
-                pantryPass = false; 
+                pantryPass = false;
             } else {
                 pantryPass = recipe.ingredients.every(ing => selectedArray.includes(ing));
+            }
+        } else {
+            if (selectedArray.length > 0) {
+                pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
             }
         }
 
