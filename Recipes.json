@@ -355,5 +355,19 @@
     { "name": "Royal Harvest Platter", "ingredients": ["Giant Leek", "Royal Rabbit Cut", "Royal Shellfish"], "money": 5718300000, "rarity": 6 },
     { "name": "Seared Golden Duck", "ingredients": ["Golden Duck Breast"], "money": 544600000, "rarity": 6 },
     { "name": "Seared Golden Flatfish", "ingredients": ["Golden Flatfish Fin"], "money": 544600000, "rarity": 6 }
+    { "name": "Charged Shard", "ingredients": ["Lightning Shard"], "money": 363431, "rarity": 3 },
+    { "name": "Creamy Veggie Bowl", "ingredients": ["Creamy Yogurt", "Fresh Vegetables", "Corn"], "money": 12460, "rarity": 3 },
+    { "name": "Crackling Thunder Plate", "ingredients": ["Lightning Shard", "Thunderstrike Crystal"], "money": 2769000, "rarity": 4 },
+    { "name": "Glow Fruit Parfait", "ingredients": ["Glow Fruit", "Creamy Yogurt", "Oats"], "money": 41535, "rarity": 4 },
+    { "name": "Glow Pork Bowl", "ingredients": ["Raw Pork", "Potato", "Creamy Yogurt", "Glow Fruit"], "money": 73101, "rarity": 4 },
+    { "name": "Refined Thunder Crystal", "ingredients": ["Thunderstrike Crystal"], "money": 1107600, "rarity": 4 },
+    { "name": "Yogurt Bowl", "ingredients": ["Creamy Yogurt", "Sugar"], "money": 15506, "rarity": 4 },
+    { "name": "Creamy Harvest Rice", "ingredients": ["Rice", "Carrots", "Creamy Yogurt", "Salt", "Fresh Vegetables"], "money": 48457, "rarity": 5 },
+    { "name": "Beef Harvest Bowl", "ingredients": ["Raw Beef", "Tomato", "Carrots", "Lemon", "Creamy Yogurt"], "money": 124605, "rarity": 5 },
+    { "name": "Distilled Storm Essence", "ingredients": ["Stormborn Essence"], "money": 3461250, "rarity": 5 },
+    { "name": "Golden Apple Tart", "ingredients": ["Golden Apple", "Premium Meat", "Butter", "Creamy Yogurt"], "money": 8169000, "rarity": 5 },
+    { "name": "Tempest Platter", "ingredients": ["Lightning Shard", "Thunderstrike Crystal", "Stormborn Essence"], "money": 15575625, "rarity": 5 },
+    { "name": "Thunderstorm Brew", "ingredients": ["Thunderstrike Crystal", "Stormborn Essence"], "money": 4970000, "rarity": 5 },
+    { "name": "Truffle Yogurt Parfait", "ingredients": ["Creamy Yogurt", "Black Truffle", "Saffron Threads"], "money": 41535, "rarity": 5 }
   ]
 }
