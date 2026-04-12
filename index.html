@@ -202,7 +202,7 @@
         }
 
         function updateDisplay() {
-            const searchTerm = searchInput.value.toLowerCase();
+            const searchTerm = searchInput.value.toLowerCase().trim();
             const selectedArray = Array.from(selectedPantryItems);
             const mode = document.querySelector('input[name="pantryMode"]:checked').value;
             
@@ -234,10 +234,10 @@
                 return textPass && pantryPass && rightSidePass;
             });
         
-            renderCards(filtered, selectedArray, rightSideInputs);
+            renderCards(filtered, selectedArray, rightSideInputs, searchTerm);
         }
-
-        function renderCards(data, selected, searchInputs) {
+        
+        function renderCards(data, selected, searchInputs, mainSearch) {
             recipeContainer.innerHTML = "";
             countDisplay.textContent = data.length;
         
@@ -247,10 +247,12 @@
                 
                 const ingredientsHTML = recipe.ingredients.map(ing => {
                     const lowerIng = ing.toLowerCase();
-                    const isSelectedInPantry = selected.includes(ing);
-                    const isMatchedInSearch = searchInputs.some(s => lowerIng.includes(s));
                     
-                    const hasItem = isSelectedInPantry || isMatchedInSearch;
+                    const isSelectedInPantry = selected.includes(ing);
+                    const isMatchedInRightSidebar = searchInputs.some(s => lowerIng.includes(s));
+                    const isMatchedInMainSearch = (mainSearch && searchByIngredient.checked && lowerIng.includes(mainSearch));
+                    
+                    const hasItem = isSelectedInPantry || isMatchedInRightSidebar || isMatchedInMainSearch;
                     
                     return `<li class="${hasItem ? 'has-it' : ''}">${hasItem ? '✓' : '•'} ${ing}</li>`;
                 }).join('');
