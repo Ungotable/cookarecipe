@@ -2,7 +2,7 @@ let recipes = [];
 let ingredientsSet = new Set();
 
 const searchInput = document.getElementById('searchInput');
-const pantrySearch = document.getElementById('pantrySearch'); // New pantry search
+const pantrySearch = document.getElementById('pantrySearch');
 const searchByName = document.getElementById('searchByName');
 const searchByIngredient = document.getElementById('searchByIngredient');
 const recipeContainer = document.getElementById('recipeContainer');
@@ -24,7 +24,6 @@ async function init() {
     }
 }
 
-// Renders the ingredient list with a sub-filter
 function renderPantry() {
     const filter = pantrySearch.value.toLowerCase();
     ingredientsList.innerHTML = "";
@@ -32,7 +31,6 @@ function renderPantry() {
     const sortedIngs = [...ingredientsSet].sort();
     
     sortedIngs.forEach(ing => {
-        // Only show if it matches the pantry search
         if (ing.toLowerCase().includes(filter)) {
             const label = document.createElement('label');
             label.className = "custom-checkbox";
@@ -47,25 +45,30 @@ function renderPantry() {
 
 function updateDisplay() {
     const searchTerm = searchInput.value.toLowerCase();
-    // Get all checked items (even those hidden by the pantry search filter)
-    const selectedIngs = Array.from(document.querySelectorAll('.pantry-item:checked')).map(i => i.value);
+    const selectedArray = Array.from(selectedPantryItems);
+    
+    const mode = document.querySelector('input[name="pantryMode"]:checked').value;
 
     const filtered = recipes.filter(recipe => {
-        // 1. Text Search Logic
         const matchesName = searchByName.checked && recipe.name.toLowerCase().includes(searchTerm);
         const matchesIngText = searchByIngredient.checked && recipe.ingredients.some(i => i.toLowerCase().includes(searchTerm));
         const textPass = !searchTerm || matchesName || matchesIngText;
 
-        // 2. "OR" Pantry Logic (Isolates any recipe that contains ANY of the checked items)
         let pantryPass = true;
-        if (selectedIngs.length > 0) {
-            pantryPass = recipe.ingredients.some(ing => selectedIngs.includes(ing));
+        if (selectedArray.length > 0) {
+            if (mode === 'any') {
+                pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
+            } else {
+                pantryPass = recipe.ingredients.every(ing => selectedArray.includes(ing));
+            }
+        } else if (mode === 'full') {
+            pantryPass = false;
         }
 
         return textPass && pantryPass;
     });
 
-    renderCards(filtered, selectedIngs);
+    renderCards(filtered, selectedArray);
 }
 
 function renderCards(data, selected) {
@@ -98,9 +101,8 @@ function clearChecks() {
     updateDisplay();
 }
 
-// Listeners
 searchInput.addEventListener('input', updateDisplay);
-pantrySearch.addEventListener('input', renderPantry); // Listener for pantry search
+pantrySearch.addEventListener('input', renderPantry); 
 searchByName.addEventListener('change', updateDisplay);
 searchByIngredient.addEventListener('change', updateDisplay);
 
