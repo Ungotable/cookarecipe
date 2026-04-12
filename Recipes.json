@@ -354,7 +354,7 @@
     { "name": "Royal Fugu Goose Feast", "ingredients": ["Royal Cabbage", "Golden Goose Breast", "Imperial Fugu"], "money": 5718300000, "rarity": 6 },
     { "name": "Royal Harvest Platter", "ingredients": ["Giant Leek", "Royal Rabbit Cut", "Royal Shellfish"], "money": 5718300000, "rarity": 6 },
     { "name": "Seared Golden Duck", "ingredients": ["Golden Duck Breast"], "money": 544600000, "rarity": 6 },
-    { "name": "Seared Golden Flatfish", "ingredients": ["Golden Flatfish Fin"], "money": 544600000, "rarity": 6 }
+    { "name": "Seared Golden Flatfish", "ingredients": ["Golden Flatfish Fin"], "money": 544600000, "rarity": 6 },
     { "name": "Charged Shard", "ingredients": ["Lightning Shard"], "money": 363431, "rarity": 3 },
     { "name": "Creamy Veggie Bowl", "ingredients": ["Creamy Yogurt", "Fresh Vegetables", "Corn"], "money": 12460, "rarity": 3 },
     { "name": "Crackling Thunder Plate", "ingredients": ["Lightning Shard", "Thunderstrike Crystal"], "money": 2769000, "rarity": 4 },
