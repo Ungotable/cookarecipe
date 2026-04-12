@@ -26,7 +26,7 @@
         }
         header h1 { font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 0.5rem; }
 
-        .container { max-width: 1200px; margin: -3rem auto 2rem; padding: 0 1rem; }
+        .container { max-width: 1400px; margin: -3rem auto 2rem; padding: 0 1rem; }
 
         .search-section {
             background: var(--card-bg); padding: 1.5rem; border-radius: 1rem;
@@ -39,12 +39,38 @@
         .search-bar input:focus { border-color: var(--primary); outline: none; }
         .search-options { display: flex; gap: 1.5rem; margin-top: 1rem; font-size: 0.9rem; }
 
-        .layout { display: grid; grid-template-columns: 300px 1fr; gap: 2rem; }
-        @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+        .layout { 
+            display: grid; 
+            grid-template-columns: 280px 1fr 280px; 
+            gap: 1.5rem; 
+        }
 
-        .pantry-sidebar { background: var(--card-bg); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow); height: fit-content; }
-        .sticky-pantry { position: sticky; top: 1.5rem; }
+        @media (max-width: 1100px) { 
+            .layout { grid-template-columns: 1fr; } 
+        }
+
+        .pantry-sidebar, .recipe-search-sidebar {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 1.5rem;
+        }
+
+        .recipe-search-sidebar h2 { font-size: 1.2rem; margin-bottom: 1rem; color: var(--primary); }
         
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+        .input-group input { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
         .mode-selector {
             margin: 15px 0; padding: 12px; background: #f1f5f9; border-radius: 8px; font-size: 0.85rem;
         }
@@ -97,23 +123,34 @@
 
         <div class="layout">
             <aside class="pantry-sidebar">
-                <div class="sticky-pantry">
-                    <h2>My Pantry</h2>
-                    <div class="mode-selector">
-                        <p>Search Mode:</p>
-                        <label><input type="radio" name="pantryMode" value="any" checked> Contains any selected</label>
-                        <label><input type="radio" name="pantryMode" value="full"> Only recipes I can cook</label>
-                    </div>
-                    <input type="text" id="pantrySearch" placeholder="Filter ingredient names...">
-                    <div id="ingredientsList" class="checkbox-group"></div>
-                    <button onclick="clearChecks()" class="btn-reset">Clear All Selections</button>
+                <h2>My Pantry</h2>
+                <div class="mode-selector">
+                    <p>Search Mode:</p>
+                    <label><input type="radio" name="pantryMode" value="any" checked> Contains any selected</label>
+                    <label><input type="radio" name="pantryMode" value="full"> Only recipes I can cook</label>
                 </div>
+                <input type="text" id="pantrySearch" placeholder="Filter ingredient names...">
+                <div id="ingredientsList" class="checkbox-group"></div>
+                <button onclick="clearChecks()" class="btn-reset">Clear All Selections</button>
             </aside>
 
             <section class="recipe-results">
                 <div style="margin-bottom: 1rem; font-weight: 600;">Showing <span id="recipeCount">0</span> Recipes</div>
                 <div id="recipeContainer" class="recipe-grid"></div>
             </section>
+
+            <aside class="recipe-search-sidebar">
+                <h2>Search Recipe</h2>
+                <p style="font-size: 0.75rem; margin-bottom: 1rem;">Find recipes containing these specific items:</p>
+                <div id="ingredientInputs">
+                    <div class="input-group"><label>Item 1</label><input type="text" class="recipe-ing-input" placeholder="e.g. Premium Meat"></div>
+                    <div class="input-group"><label>Item 2</label><input type="text" class="recipe-ing-input" placeholder="e.g. Eggs"></div>
+                    <div class="input-group"><label>Item 3</label><input type="text" class="recipe-ing-input"></div>
+                    <div class="input-group"><label>Item 4</label><input type="text" class="recipe-ing-input"></div>
+                    <div class="input-group"><label>Item 5</label><input type="text" class="recipe-ing-input"></div>
+                </div>
+                <button onclick="clearRecipeSearch()" class="btn-reset" style="margin-top: 10px;">Clear Search</button>
+            </aside>
         </div>
     </main>
 
@@ -168,28 +205,35 @@
             const searchTerm = searchInput.value.toLowerCase();
             const selectedArray = Array.from(selectedPantryItems);
             const mode = document.querySelector('input[name="pantryMode"]:checked').value;
-        
+            
+            const rightSideInputs = Array.from(document.querySelectorAll('.recipe-ing-input'))
+                                         .map(input => input.value.toLowerCase().trim())
+                                         .filter(val => val !== "");
+
             const filtered = recipes.filter(recipe => {
                 const textMatch = (searchByName.checked && recipe.name.toLowerCase().includes(searchTerm)) ||
                                  (searchByIngredient.checked && recipe.ingredients.some(i => i.toLowerCase().includes(searchTerm)));
                 const textPass = !searchTerm || textMatch;
-        
-                // 2. Pantry Logic
+
                 let pantryPass = true;
-                
                 if (selectedArray.length > 0) {
                     if (mode === 'full') {
                         pantryPass = recipe.ingredients.every(ing => selectedArray.includes(ing));
                     } else {
                         pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
                     }
-                } else {
-                    pantryPass = (mode === 'any');
                 }
-        
-                return textPass && pantryPass;
+
+                let rightSidePass = true;
+                if (rightSideInputs.length > 0) {
+                    rightSidePass = rightSideInputs.every(inputIng => 
+                        recipe.ingredients.some(recipeIng => recipeIng.toLowerCase().includes(inputIng))
+                    );
+                }
+
+                return textPass && pantryPass && rightSidePass;
             });
-        
+
             renderCards(filtered, selectedArray);
         }
 
@@ -217,11 +261,19 @@
             updateDisplay();
         }
 
+        function clearRecipeSearch() {
+            document.querySelectorAll('.recipe-ing-input').forEach(input => input.value = "");
+            updateDisplay();
+        }
+
         searchInput.addEventListener('input', updateDisplay);
         pantrySearch.addEventListener('input', renderPantry);
         searchByName.addEventListener('change', updateDisplay);
         searchByIngredient.addEventListener('change', updateDisplay);
         document.querySelectorAll('input[name="pantryMode"]').forEach(r => r.addEventListener('change', updateDisplay));
+        document.querySelectorAll('.recipe-ing-input').forEach(input => {
+            input.addEventListener('input', updateDisplay);
+        });
 
         init();
     </script>
