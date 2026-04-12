@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cook a Recipe | Recipe Database</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>🍳 Chef</h1>
+            <p>Master your ingredients, discover new flavors.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="search-section">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search for recipes or specific ingredients...">
+                <div class="search-options">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="searchByName" checked>
+                        <span class="checkmark"></span> Name
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="searchByIngredient" checked>
+                        <span class="checkmark"></span> Ingredients
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <div class="layout">
+            <aside class="pantry-sidebar">
+                <div class="sticky-pantry">
+                    <h2> My Pantry</h2>
+                    <p class="subtitle">Check items you have in stock</p>
+                    <div id="ingredientsList" class="checkbox-group">
+                        <div class="loader-small"></div>
+                    </div>
+                    <button onclick="clearChecks()" class="btn-reset">Reset Pantry</button>
+                </div>
+            </aside>
+
+            <section class="recipe-results">
+                <div class="results-header">
+                    <span id="recipeCount">0</span> Recipes Found
+                </div>
+                <div id="recipeContainer" class="recipe-grid">
+                    </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
