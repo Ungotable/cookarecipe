@@ -209,12 +209,12 @@
             const rightSideInputs = Array.from(document.querySelectorAll('.recipe-ing-input'))
                                          .map(input => input.value.toLowerCase().trim())
                                          .filter(val => val !== "");
-
+        
             const filtered = recipes.filter(recipe => {
                 const textMatch = (searchByName.checked && recipe.name.toLowerCase().includes(searchTerm)) ||
                                  (searchByIngredient.checked && recipe.ingredients.some(i => i.toLowerCase().includes(searchTerm)));
                 const textPass = !searchTerm || textMatch;
-
+        
                 let pantryPass = true;
                 if (selectedArray.length > 0) {
                     if (mode === 'full') {
@@ -223,31 +223,43 @@
                         pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
                     }
                 }
-
+        
                 let rightSidePass = true;
                 if (rightSideInputs.length > 0) {
                     rightSidePass = rightSideInputs.every(inputIng => 
                         recipe.ingredients.some(recipeIng => recipeIng.toLowerCase().includes(inputIng))
                     );
                 }
-
+        
                 return textPass && pantryPass && rightSidePass;
             });
-
-            renderCards(filtered, selectedArray);
+        
+            renderCards(filtered, selectedArray, rightSideInputs);
         }
 
-        function renderCards(data, selected) {
+        function renderCards(data, selected, searchInputs) {
             recipeContainer.innerHTML = "";
             countDisplay.textContent = data.length;
+        
             data.forEach(recipe => {
                 const card = document.createElement('div');
                 card.className = "recipe-card";
+                
+                const ingredientsHTML = recipe.ingredients.map(ing => {
+                    const lowerIng = ing.toLowerCase();
+                    const isSelectedInPantry = selected.includes(ing);
+                    const isMatchedInSearch = searchInputs.some(s => lowerIng.includes(s));
+                    
+                    const hasItem = isSelectedInPantry || isMatchedInSearch;
+                    
+                    return `<li class="${hasItem ? 'has-it' : ''}">${hasItem ? '✓' : '•'} ${ing}</li>`;
+                }).join('');
+        
                 card.innerHTML = `
                     <div class="rarity">${"★".repeat(recipe.rarity || 1)}</div>
                     <h3>${recipe.name}</h3>
                     <ul class="ingredients-list">
-                        ${recipe.ingredients.map(ing => `<li class="${selected.includes(ing) ? 'has-it' : ''}">${selected.includes(ing) ? '✓' : '•'} ${ing}</li>`).join('')}
+                        ${ingredientsHTML}
                     </ul>
                     <div class="price">$${recipe.money.toLocaleString()}</div>
                 `;
