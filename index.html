@@ -168,22 +168,34 @@
             const searchTerm = searchInput.value.toLowerCase();
             const selectedArray = Array.from(selectedPantryItems);
             const mode = document.querySelector('input[name="pantryMode"]:checked').value;
-
+        
             const filtered = recipes.filter(recipe => {
+                // 1. Text Search (Bisa cari nama/bahan di search bar)
                 const textMatch = (searchByName.checked && recipe.name.toLowerCase().includes(searchTerm)) ||
                                  (searchByIngredient.checked && recipe.ingredients.some(i => i.toLowerCase().includes(searchTerm)));
                 const textPass = !searchTerm || textMatch;
-
+        
+                // 2. Pantry Logic
                 let pantryPass = true;
-                if (mode === 'full') {
-                    pantryPass = selectedArray.length > 0 && recipe.ingredients.every(ing => selectedArray.includes(ing));
-                } else if (selectedArray.length > 0) {
-                    pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
+                
+                if (selectedArray.length > 0) {
+                    if (mode === 'full') {
+                        // LOGIKA BARU: Resep boleh muncul jika SEMUA bahannya ada di dalam daftar yang dicentang.
+                        // Ini mencakup resep dengan 1 bahan, 2 bahan, dst, selama kamu punya semuanya.
+                        pantryPass = recipe.ingredients.every(ing => selectedArray.includes(ing));
+                    } else {
+                        // Mode Any: Muncul jika minimal ada 1 bahan yang cocok
+                        pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
+                    }
+                } else {
+                    // Jika tidak ada yang dicentang:
+                    // Mode 'any' tampilkan semua, mode 'full' tampilkan 0
+                    pantryPass = (mode === 'any');
                 }
-
+        
                 return textPass && pantryPass;
             });
-
+        
             renderCards(filtered, selectedArray);
         }
 
