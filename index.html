@@ -3,17 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cook a Recipe | Interactive Recipe Database</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Chef's Recipe | Cook A Recipe Database</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #10b981;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: var(--text-main); line-height: 1.6; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; padding: 3rem 1rem 5rem; text-align: center; box-shadow: var(--shadow);
+        }
+        header h1 { font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 0.5rem; }
+
+        .container { max-width: 1200px; margin: -3rem auto 2rem; padding: 0 1rem; }
+
+        .search-section {
+            background: var(--card-bg); padding: 1.5rem; border-radius: 1rem;
+            box-shadow: var(--shadow); margin-bottom: 2rem;
+        }
+        .search-bar input {
+            width: 100%; padding: 1rem 1.5rem; border: 2px solid #e2e8f0;
+            border-radius: 0.5rem; font-size: 1rem; transition: 0.3s;
+        }
+        .search-bar input:focus { border-color: var(--primary); outline: none; }
+        .search-options { display: flex; gap: 1.5rem; margin-top: 1rem; font-size: 0.9rem; }
+
+        .layout { display: grid; grid-template-columns: 300px 1fr; gap: 2rem; }
+        @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+        .pantry-sidebar { background: var(--card-bg); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow); height: fit-content; }
+        .sticky-pantry { position: sticky; top: 1.5rem; }
+        
+        .mode-selector {
+            margin: 15px 0; padding: 12px; background: #f1f5f9; border-radius: 8px; font-size: 0.85rem;
+        }
+        .mode-selector p { font-weight: 700; margin-bottom: 8px; color: var(--primary-dark); }
+        .mode-selector label { display: block; cursor: pointer; margin-bottom: 5px; color: var(--text-muted); }
+        .mode-selector input { margin-right: 8px; }
+
+        #pantrySearch {
+            width: 100%; padding: 0.6rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 0.4rem;
+        }
+        .checkbox-group { margin: 1rem 0; max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .custom-checkbox { display: flex; align-items: center; padding: 6px 0; cursor: pointer; font-size: 0.85rem; }
+        .custom-checkbox input { margin-right: 10px; }
+
+        .btn-reset { 
+            width: 100%; padding: 0.8rem; background: #fee2e2; color: #ef4444; 
+            border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600; 
+        }
+
+        .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .recipe-card {
+            background: var(--card-bg); border-radius: 1rem; padding: 1.5rem;
+            box-shadow: var(--shadow); border-top: 5px solid var(--primary);
+            transition: 0.3s; display: flex; flex-direction: column;
+        }
+        .recipe-card:hover { transform: translateY(-5px); }
+        .rarity { color: #f59e0b; font-weight: bold; margin-bottom: 0.5rem; }
+        .ingredients-list { list-style: none; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; flex-grow: 1; }
+        .has-it { color: var(--accent); font-weight: 700; }
+        .price { font-weight: 700; color: var(--accent); font-size: 1.2rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; }
+    </style>
 </head>
 <body>
 
     <header>
-        <div class="header-content">
-            <h1>🍳 Chef's Recipe</h1>
-            <p>Select ingredients you have to find matching recipes</p>
-        </div>
+        <h1>🍳 Chef's Recipe</h1>
+        <p>Select ingredients you have to find matching recipes</p>
     </header>
 
     <main class="container">
@@ -21,45 +89,135 @@
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Search recipes or ingredients...">
                 <div class="search-options">
-                    <label style="cursor: pointer;"><input type="checkbox" id="searchByName" checked> Name</label>
-                    <label style="cursor: pointer;"><input type="checkbox" id="searchByIngredient" checked> Ingredients</label>
+                    <label><input type="checkbox" id="searchByName" checked> Name</label>
+                    <label><input type="checkbox" id="searchByIngredient" checked> Ingredients</label>
                 </div>
             </div>
         </section>
 
         <div class="layout">
-           <aside class="pantry-sidebar">
-            <div class="sticky-pantry">
-                <h2>My Pantry</h2>
-                
-                <div class="mode-selector" style="margin: 15px 0; font-size: 0.85rem; background: #f1f5f9; padding: 10px; border-radius: 8px;">
-                    <p style="font-weight: 600; margin-bottom: 8px; color: var(--primary-dark);">Search Mode:</p>
-                    <label style="display: block; cursor: pointer; margin-bottom: 5px;">
-                        <input type="radio" name="pantryMode" value="any" checked onchange="updateDisplay()"> 
-                        Contains any of selected
-                    </label>
-                    <label style="display: block; cursor: pointer;">
-                        <input type="radio" name="pantryMode" value="full" onchange="updateDisplay()"> 
-                        Only recipes I can cook
-                    </label>
+            <aside class="pantry-sidebar">
+                <div class="sticky-pantry">
+                    <h2>My Pantry</h2>
+                    <div class="mode-selector">
+                        <p>Search Mode:</p>
+                        <label><input type="radio" name="pantryMode" value="any" checked> Contains any selected</label>
+                        <label><input type="radio" name="pantryMode" value="full"> Only recipes I can cook</label>
+                    </div>
+                    <input type="text" id="pantrySearch" placeholder="Filter ingredient names...">
+                    <div id="ingredientsList" class="checkbox-group"></div>
+                    <button onclick="clearChecks()" class="btn-reset">Clear All Selections</button>
                 </div>
-        
-                <input type="text" id="pantrySearch" placeholder="Filter ingredient names...">
-                <div id="ingredientsList" class="checkbox-group"></div>
-                <button onclick="clearChecks()" class="btn-reset">Clear All Selections</button>
-            </div>
-        </aside>
+            </aside>
 
             <section class="recipe-results">
-                <div class="results-header">
-                    <span>Showing <span id="recipeCount">0</span> Recipes</span>
-                </div>
-                <div id="recipeContainer" class="recipe-grid">
-                    </div>
+                <div style="margin-bottom: 1rem; font-weight: 600;">Showing <span id="recipeCount">0</span> Recipes</div>
+                <div id="recipeContainer" class="recipe-grid"></div>
             </section>
         </div>
     </main>
 
-    <script src="script.js"></script>
+    <script>
+        let recipes = [];
+        let ingredientsSet = new Set();
+        let selectedPantryItems = new Set();
+
+        const searchInput = document.getElementById('searchInput');
+        const pantrySearch = document.getElementById('pantrySearch');
+        const searchByName = document.getElementById('searchByName');
+        const searchByIngredient = document.getElementById('searchByIngredient');
+        const recipeContainer = document.getElementById('recipeContainer');
+        const ingredientsList = document.getElementById('ingredientsList');
+        const countDisplay = document.getElementById('recipeCount');
+
+        async function init() {
+            try {
+                const res = await fetch('https://raw.githubusercontent.com/Ungotable/cookarecipe/refs/heads/main/Recipes.json');
+                const data = await res.json();
+                recipes = Object.values(data).flat();
+                recipes.forEach(r => r.ingredients.forEach(ing => ingredientsSet.add(ing)));
+                
+                renderPantry();
+                updateDisplay();
+            } catch (err) {
+                recipeContainer.innerHTML = "<p>Failed to load data.</p>";
+            }
+        }
+
+        function renderPantry() {
+            const filter = pantrySearch.value.toLowerCase();
+            ingredientsList.innerHTML = "";
+            [...ingredientsSet].sort().forEach(ing => {
+                if (ing.toLowerCase().includes(filter)) {
+                    const label = document.createElement('label');
+                    label.className = "custom-checkbox";
+                    const isChecked = selectedPantryItems.has(ing);
+                    label.innerHTML = `<input type="checkbox" value="${ing}" ${isChecked ? 'checked' : ''}> <span>${ing}</span>`;
+                    
+                    label.querySelector('input').addEventListener('change', (e) => {
+                        if (e.target.checked) selectedPantryItems.add(ing);
+                        else selectedPantryItems.delete(ing);
+                        updateDisplay();
+                    });
+                    ingredientsList.appendChild(label);
+                }
+            });
+        }
+
+        function updateDisplay() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedArray = Array.from(selectedPantryItems);
+            const mode = document.querySelector('input[name="pantryMode"]:checked').value;
+
+            const filtered = recipes.filter(recipe => {
+                const textMatch = (searchByName.checked && recipe.name.toLowerCase().includes(searchTerm)) ||
+                                 (searchByIngredient.checked && recipe.ingredients.some(i => i.toLowerCase().includes(searchTerm)));
+                const textPass = !searchTerm || textMatch;
+
+                let pantryPass = true;
+                if (mode === 'full') {
+                    pantryPass = selectedArray.length > 0 && recipe.ingredients.every(ing => selectedArray.includes(ing));
+                } else if (selectedArray.length > 0) {
+                    pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
+                }
+
+                return textPass && pantryPass;
+            });
+
+            renderCards(filtered, selectedArray);
+        }
+
+        function renderCards(data, selected) {
+            recipeContainer.innerHTML = "";
+            countDisplay.textContent = data.length;
+            data.forEach(recipe => {
+                const card = document.createElement('div');
+                card.className = "recipe-card";
+                card.innerHTML = `
+                    <div class="rarity">${"★".repeat(recipe.rarity || 1)}</div>
+                    <h3>${recipe.name}</h3>
+                    <ul class="ingredients-list">
+                        ${recipe.ingredients.map(ing => `<li class="${selected.includes(ing) ? 'has-it' : ''}">${selected.includes(ing) ? '✓' : '•'} ${ing}</li>`).join('')}
+                    </ul>
+                    <div class="price">$${recipe.money.toLocaleString()}</div>
+                `;
+                recipeContainer.appendChild(card);
+            });
+        }
+
+        function clearChecks() {
+            selectedPantryItems.clear();
+            renderPantry();
+            updateDisplay();
+        }
+
+        searchInput.addEventListener('input', updateDisplay);
+        pantrySearch.addEventListener('input', renderPantry);
+        searchByName.addEventListener('change', updateDisplay);
+        searchByIngredient.addEventListener('change', updateDisplay);
+        document.querySelectorAll('input[name="pantryMode"]').forEach(r => r.addEventListener('change', updateDisplay));
+
+        init();
+    </script>
 </body>
 </html>
