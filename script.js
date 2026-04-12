@@ -24,6 +24,15 @@ async function init() {
     }
 }
 
+Wah, itu kayaknya karena ada "tabrakan" logika di bagian renderPantry. Kalau di screenshot itu, checkbox-nya terlihat berwarna ungu penuh (seperti di-override CSS atau state-nya tidak sinkron), jadi sistem menganggap barangnya belum "terpilih" dengan benar di dalam kode JavaScript-nya.
+
+Satu hal lagi: di mode "Only recipes I can cook", resep yang bahannya cuma 1 (seperti Toasted Flour yang cuma butuh Flour) bakal muncul kalau kamu belum pilih bahan apa-apa karena nilai defaultnya true.
+
+Ayo kita perbaiki script.js kamu supaya logikanya lebih ketat. Gunakan kode di bawah ini untuk mengganti fungsi updateDisplay dan renderPantry:
+
+Perbaikan script.js
+JavaScript
+
 function renderPantry() {
     const filter = pantrySearch.value.toLowerCase();
     ingredientsList.innerHTML = "";
@@ -34,10 +43,23 @@ function renderPantry() {
         if (ing.toLowerCase().includes(filter)) {
             const label = document.createElement('label');
             label.className = "custom-checkbox";
+            
+            const isChecked = selectedPantryItems.has(ing);
+            
             label.innerHTML = `
-                <input type="checkbox" value="${ing}" class="pantry-item" onchange="updateDisplay()">
-                <span class="checkmark"></span> ${ing}
+                <input type="checkbox" value="${ing}" ${isChecked ? 'checked' : ''}>
+                <span>${ing}</span>
             `;
+
+            label.querySelector('input').addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    selectedPantryItems.add(ing);
+                } else {
+                    selectedPantryItems.delete(ing);
+                }
+                updateDisplay();
+            });
+
             ingredientsList.appendChild(label);
         }
     });
@@ -55,14 +77,17 @@ function updateDisplay() {
         const textPass = !searchTerm || matchesName || matchesIngText;
 
         let pantryPass = true;
-        if (selectedArray.length > 0) {
-            if (mode === 'any') {
+
+        if (mode === 'any') {
+            if (selectedArray.length > 0) {
                 pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
+            }
+        } else {
+            if (selectedArray.length === 0) {
+                pantryPass = false; 
             } else {
                 pantryPass = recipe.ingredients.every(ing => selectedArray.includes(ing));
             }
-        } else if (mode === 'full') {
-            pantryPass = false;
         }
 
         return textPass && pantryPass;
