@@ -1,5 +1,6 @@
 let recipes = [];
 let ingredientsSet = new Set();
+let selectedPantryItems = new Set(); // Global state to track checks
 
 const searchInput = document.getElementById('searchInput');
 const pantrySearch = document.getElementById('pantrySearch');
@@ -15,26 +16,24 @@ async function init() {
         const data = await res.json();
         
         recipes = Object.values(data).flat();
-        recipes.forEach(r => r.ingredients.forEach(i => ingredientsSet.add(i)));
+        
+        // Extract ingredients
+        recipes.forEach(r => {
+            if(r.ingredients) {
+                r.ingredients.forEach(ing => ingredientsSet.add(ing));
+            }
+        });
 
         renderPantry();
         updateDisplay();
     } catch (err) {
-        recipeContainer.innerHTML = `<p class="error">Failed to load recipe data.</p>`;
+        console.error("Fetch error:", err);
+        recipeContainer.innerHTML = `<p>Error loading recipes. Check connection.</p>`;
     }
 }
 
-Wah, itu kayaknya karena ada "tabrakan" logika di bagian renderPantry. Kalau di screenshot itu, checkbox-nya terlihat berwarna ungu penuh (seperti di-override CSS atau state-nya tidak sinkron), jadi sistem menganggap barangnya belum "terpilih" dengan benar di dalam kode JavaScript-nya.
-
-Satu hal lagi: di mode "Only recipes I can cook", resep yang bahannya cuma 1 (seperti Toasted Flour yang cuma butuh Flour) bakal muncul kalau kamu belum pilih bahan apa-apa karena nilai defaultnya true.
-
-Ayo kita perbaiki script.js kamu supaya logikanya lebih ketat. Gunakan kode di bawah ini untuk mengganti fungsi updateDisplay dan renderPantry:
-
-Perbaikan script.js
-JavaScript
-
 function renderPantry() {
-    const filter = pantrySearch.value.toLowerCase();
+    const filter = pantrySearch ? pantrySearch.value.toLowerCase() : "";
     ingredientsList.innerHTML = "";
     
     const sortedIngs = [...ingredientsSet].sort();
@@ -43,7 +42,6 @@ function renderPantry() {
         if (ing.toLowerCase().includes(filter)) {
             const label = document.createElement('label');
             label.className = "custom-checkbox";
-            
             const isChecked = selectedPantryItems.has(ing);
             
             label.innerHTML = `
@@ -51,6 +49,7 @@ function renderPantry() {
                 <span>${ing}</span>
             `;
 
+            // CRITICAL: Handle the check state
             label.querySelector('input').addEventListener('change', (e) => {
                 if (e.target.checked) {
                     selectedPantryItems.add(ing);
@@ -68,22 +67,28 @@ function renderPantry() {
 function updateDisplay() {
     const searchTerm = searchInput.value.toLowerCase();
     const selectedArray = Array.from(selectedPantryItems);
-    const mode = document.querySelector('input[name="pantryMode"]:checked').value;
+    
+    // Get mode safely
+    const modeEl = document.querySelector('input[name="pantryMode"]:checked');
+    const mode = modeEl ? modeEl.value : 'any';
 
     const filtered = recipes.filter(recipe => {
+        // 1. Text Search
         const matchesName = searchByName.checked && recipe.name.toLowerCase().includes(searchTerm);
         const matchesIngText = searchByIngredient.checked && recipe.ingredients.some(i => i.toLowerCase().includes(searchTerm));
         const textPass = !searchTerm || matchesName || matchesIngText;
 
+        // 2. Strict Pantry Logic
         let pantryPass = true;
-
         if (mode === 'full') {
             if (selectedArray.length === 0) {
-                pantryPass = false;
+                pantryPass = false; // Can't cook anything with 0 items
             } else {
+                // MUST have every ingredient in the recipe
                 pantryPass = recipe.ingredients.every(ing => selectedArray.includes(ing));
             }
         } else {
+            // "Any" Mode
             if (selectedArray.length > 0) {
                 pantryPass = recipe.ingredients.some(ing => selectedArray.includes(ing));
             }
@@ -99,20 +104,23 @@ function renderCards(data, selected) {
     recipeContainer.innerHTML = "";
     countDisplay.textContent = data.length;
 
+    if (data.length === 0) {
+        recipeContainer.innerHTML = `<p style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #94a3b8;">No recipes found. Try checking more ingredients!</p>`;
+        return;
+    }
+
     data.forEach(recipe => {
         const card = document.createElement('div');
         card.className = "recipe-card";
-        const stars = "★".repeat(recipe.rarity);
-        
+        const stars = "★".repeat(recipe.rarity || 1);
         card.innerHTML = `
             <div class="rarity">${stars}</div>
             <h3>${recipe.name}</h3>
             <ul class="ingredients-list">
-                ${recipe.ingredients.map(ing => `
-                    <li class="${selected.includes(ing) ? 'has-it' : ''}">
-                        ${selected.includes(ing) ? '✓ ' : '• '} ${ing}
-                    </li>
-                `).join('')}
+                ${recipe.ingredients.map(ing => {
+                    const hasIt = selected.includes(ing);
+                    return `<li class="${hasIt ? 'has-it' : ''}">${hasIt ? '✓' : '•'} ${ing}</li>`;
+                }).join('')}
             </ul>
             <div class="price">$${recipe.money.toLocaleString()}</div>
         `;
@@ -121,13 +129,16 @@ function renderCards(data, selected) {
 }
 
 function clearChecks() {
-    document.querySelectorAll('.pantry-item').forEach(i => i.checked = false);
+    selectedPantryItems.clear();
+    renderPantry();
     updateDisplay();
 }
 
-searchInput.addEventListener('input', updateDisplay);
-pantrySearch.addEventListener('input', renderPantry); 
-searchByName.addEventListener('change', updateDisplay);
-searchByIngredient.addEventListener('change', updateDisplay);
+// Event Listeners
+if(searchInput) searchInput.addEventListener('input', updateDisplay);
+if(pantrySearch) pantrySearch.addEventListener('input', renderPantry);
+if(searchByName) searchByName.addEventListener('change', updateDisplay);
+if(searchByIngredient) searchByIngredient.addEventListener('change', updateDisplay);
 
+// Start
 init();
