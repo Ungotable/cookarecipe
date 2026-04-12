@@ -2,6 +2,7 @@ let recipes = [];
 let ingredientsSet = new Set();
 
 const searchInput = document.getElementById('searchInput');
+const pantrySearch = document.getElementById('pantrySearch'); // New pantry search
 const searchByName = document.getElementById('searchByName');
 const searchByIngredient = document.getElementById('searchByIngredient');
 const recipeContainer = document.getElementById('recipeContainer');
@@ -13,45 +14,53 @@ async function init() {
         const res = await fetch('https://raw.githubusercontent.com/Ungotable/cookarecipe/refs/heads/main/Recipes.json');
         const data = await res.json();
         
-        // Flatten the multi-part JSON into one array
         recipes = Object.values(data).flat();
-
-        // Extract unique ingredients
         recipes.forEach(r => r.ingredients.forEach(i => ingredientsSet.add(i)));
 
         renderPantry();
         updateDisplay();
     } catch (err) {
-        recipeContainer.innerHTML = `<p class="error">Failed to load recipe data. Please check connection.</p>`;
+        recipeContainer.innerHTML = `<p class="error">Failed to load recipe data.</p>`;
     }
 }
 
+// Renders the ingredient list with a sub-filter
 function renderPantry() {
+    const filter = pantrySearch.value.toLowerCase();
     ingredientsList.innerHTML = "";
-    [...ingredientsSet].sort().forEach(ing => {
-        const label = document.createElement('label');
-        label.className = "custom-checkbox";
-        label.innerHTML = `
-            <input type="checkbox" value="${ing}" class="pantry-item" onchange="updateDisplay()">
-            <span class="checkmark"></span> ${ing}
-        `;
-        ingredientsList.appendChild(label);
+    
+    const sortedIngs = [...ingredientsSet].sort();
+    
+    sortedIngs.forEach(ing => {
+        // Only show if it matches the pantry search
+        if (ing.toLowerCase().includes(filter)) {
+            const label = document.createElement('label');
+            label.className = "custom-checkbox";
+            label.innerHTML = `
+                <input type="checkbox" value="${ing}" class="pantry-item" onchange="updateDisplay()">
+                <span class="checkmark"></span> ${ing}
+            `;
+            ingredientsList.appendChild(label);
+        }
     });
 }
 
 function updateDisplay() {
     const searchTerm = searchInput.value.toLowerCase();
+    // Get all checked items (even those hidden by the pantry search filter)
     const selectedIngs = Array.from(document.querySelectorAll('.pantry-item:checked')).map(i => i.value);
 
     const filtered = recipes.filter(recipe => {
-        // Text Search logic
+        // 1. Text Search Logic
         const matchesName = searchByName.checked && recipe.name.toLowerCase().includes(searchTerm);
         const matchesIngText = searchByIngredient.checked && recipe.ingredients.some(i => i.toLowerCase().includes(searchTerm));
         const textPass = !searchTerm || matchesName || matchesIngText;
 
-        // Pantry logic (Recipe must contain ALL selected ingredients)
-        const pantryPass = selectedIngs.length === 0 || 
-                           selectedIngs.every(selected => recipe.ingredients.includes(selected));
+        // 2. "OR" Pantry Logic (Isolates any recipe that contains ANY of the checked items)
+        let pantryPass = true;
+        if (selectedIngs.length > 0) {
+            pantryPass = recipe.ingredients.some(ing => selectedIngs.includes(ing));
+        }
 
         return textPass && pantryPass;
     });
@@ -66,7 +75,6 @@ function renderCards(data, selected) {
     data.forEach(recipe => {
         const card = document.createElement('div');
         card.className = "recipe-card";
-        
         const stars = "★".repeat(recipe.rarity);
         
         card.innerHTML = `
@@ -92,6 +100,7 @@ function clearChecks() {
 
 // Listeners
 searchInput.addEventListener('input', updateDisplay);
+pantrySearch.addEventListener('input', renderPantry); // Listener for pantry search
 searchByName.addEventListener('change', updateDisplay);
 searchByIngredient.addEventListener('change', updateDisplay);
 
