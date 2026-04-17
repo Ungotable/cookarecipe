@@ -14,6 +14,16 @@ Curious about how the website looks and works? No need to wait, just click the l
 
 ---
 
+## 🎮 How to Find This Website (For Roblox Players!)
+
+Are you playing Roblox and need to find this recipe database quickly? It's super easy! Just follow these steps:
+
+1. Open **Google**.
+2. Type in the search bar: **`TeaOtaku ungotable`**
+3. Hit enter, and click on the link that leads to this GitHub repository or the live website! 
+
+---
+
 ## ✨ Key Features
 
 * 🔍 **Fast Search:** Find your favorite food recipes easily.
